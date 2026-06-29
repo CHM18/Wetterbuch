@@ -1,0 +1,50 @@
+# Original C64 Files (not needed in repo)
+*.PRG
+*.prg
+*.d64
+*.SEQ
+*.seq
+
+# Generated/Output Files
+SIMONS_BASIC.txt
+embedded_data.js
+Wetterbuch.zip
+
+# Original data directories
+1985/
+1986/
+1987/
+1988/
+1989/
+1990/
+1991/
+1992/
+1993/
+1994/
+1995/
+1996/
+1997/
+1998/
+
+# Debug and temporary files
+_debug_script.js
+analyze_braces.py
+check_syntax.py
+*.pyc
+__pycache__/
+.DS_Store
+*.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node modules (if using npm)
+node_modules/
+package-lock.json
+
+# OS files
+Thumbs.db
