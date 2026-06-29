@@ -1,6 +1,6 @@
 # Wetterbuch.html - Modern web-version of the C64 Wetterbuch
 
-** To browse the data from 1985-1998, just open Wetterbuch.html in a webbrowser **
+**To browse the data from 1985-1998, just open Wetterbuch.html in a webbrowser or run export_weather_to_excel.py to create a Excel Workbook with the data**
 
 # WETTERBU.PRG — Commodore 64 Weather Diary ("Wetterbuch")
 
