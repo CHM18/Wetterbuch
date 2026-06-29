@@ -234,6 +234,56 @@ python check_syntax.py
 
 ---
 
+### `export_weather_to_excel.py`
+**Purpose:** Export all weather data to an Excel spreadsheet for analysis and filtering.
+
+Reads all 168 `.SEQ` files (14 years × 12 months from 1985–1998), parses the weather data, and creates a formatted Excel file with monthly summaries. Enables filtering and sorting by year, month, weather types, temperature, and precipitation.
+
+**Usage:**
+```bash
+python export_weather_to_excel.py
+```
+
+**Output:**
+- `Wetterdaten.xlsx` — Excel file with 155 rows (header + 154 months) and 14 columns:
+  - **Columns A–B:** Jahr (Year), Monat (Month name in German)
+  - **Columns C–J:** Weather type icons (☀ Sonne, 🌤 Heiter, ☁ Bewölkt, 💧 Regen, ⚡ Gewitter, 🧊 Hagel, ❄ Schnee, 🌫 Nebel)
+    - Icons appear only in months where that weather type was observed (determined by bitmask)
+    - Empty cell if weather type did not occur
+  - **Columns K–L:** Min Temp (°C), Max Temp (°C)
+  - **Columns M–N:** Regen (mm) — max daily rainfall, Schnee (cm) — max daily snowfall
+
+**Features:**
+- Automatically detects month from SEQ filename (e.g., `JANUAR1985.SEQ` → January 1985)
+- Bitmask decoding: Each weather icon appears if that phenomenon occurred ≥1 day in the month
+- Color-coded header row (blue background, white text)
+- Centered alignment and borders for all cells
+- Frozen header row for easy scrolling
+- Supports up to 14 years of data (1985–1998)
+
+**Data Format in Excel:**
+| Year | Month | ☀ | 🌤 | ☁ | 💧 | ⚡ | 🧊 | ❄ | 🌫 | Min Temp | Max Temp | Regen(mm) | Schnee(cm) |
+|:----:|:-----:|:-:|:--:|:-:|:-:|:-:|:-:|:-:|:-:|:--------:|:--------:|:--------:|:--------:|
+| 1985 | Januar | ☀ | 🌤 | ☁ | | | | ❄ | | -8 | 12 | 5 | 15 |
+| 1985 | Februar | ☀ | | ☁ | 💧 | ⚡ | | | 🌫 | -12 | 8 | 8 | 20 |
+
+**Example Filtering:**
+- Find months with thunderstorms: Filter Column F (⚡) for non-empty cells
+- Find coldest months: Sort by Min Temp (Column K)
+- Find wettest months: Sort by Regen(mm) (Column M) descending
+- Find snowy months: Filter Column G (❄) for non-empty cells
+
+**Requirements:**
+- Python 3.6+
+- `openpyxl` library: `pip install openpyxl`
+
+**Notes:**
+- Missing month files are automatically skipped (e.g., if `OKTOBER1985.SEQ` is missing, no October 1985 row is created)
+- Recomputes monthly summary from daily data if the saved summary is incomplete (all zeros)
+- Weather type bitmask: Bit 0=Sonne, 1=Heiter, 2=Bewölkt, 3=Regen, 4=Gewitter, 5=Hagel, 6=Schnee, 7=Nebel
+- Temperature values are in °C, precipitation in mm/cm
+
+
 ## Notes on Helper Files
 
 These files were created during the development and debugging process:

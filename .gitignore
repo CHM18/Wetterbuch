@@ -9,6 +9,7 @@
 SIMONS_BASIC.txt
 embedded_data.js
 Wetterbuch.zip
+Wetterdaten.xlsx
 
 # Original data directories
 1985/
@@ -24,6 +25,7 @@ Wetterbuch.zip
 1995/
 1996/
 1997/
+
 1998/
 
 # Debug and temporary files
