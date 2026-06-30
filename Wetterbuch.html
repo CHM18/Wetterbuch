@@ -31,8 +31,10 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overscroll-behavior: none;
   font-size: 14px;
 }
+html { overflow: hidden; }
 
 /* ── Header ── */
 header {
@@ -259,7 +261,8 @@ header h1 { font-size: 1rem; font-weight: 700; letter-spacing: .04em; white-spac
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: visible;
 }
 table { width: 100%; border-collapse: collapse; font-size: .78rem; }
 thead th {
@@ -282,6 +285,91 @@ tbody tr:hover td { background: var(--surface2); }
 .t-max { color: var(--red);  font-weight: 600; }
 .w-tags { display: flex; gap: 3px; flex-wrap: wrap; }
 .w-tag  { font-size: .68rem; padding: 2px 6px; border-radius: 4px; border: 1.5px solid; background: transparent; color: var(--muted); }
+
+/* ── Mobile menu toggle & overlay ── */
+.menu-toggle { display: none; }
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 999;
+}
+.sidebar-backdrop.show { display: block; }
+
+/* ── Responsive: tablets / narrow desktop ── */
+@media (max-width: 900px) {
+  .charts-grid { grid-template-columns: 1fr; }
+  .chart-card canvas, .chart-card.wide canvas { max-height: 240px; }
+}
+
+/* ── Responsive: mobile ── */
+@media (max-width: 768px) {
+  html, body { height: 100%; }
+  body { height: 100dvh; font-size: 13.5px; }
+
+  .menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
+  .header-sub { display: none; }
+  #locationLabel { display: none; }
+
+  header { padding: 8px 10px; gap: 8px; }
+  header h1 { font-size: .92rem; }
+  .nav-arrows { gap: 4px; }
+  .hdr-load-text { display: none; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 250px;
+    max-width: 80vw;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    z-index: 1000;
+    box-shadow: 4px 0 18px rgba(0,0,0,.5);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .content { padding: 14px 12px; }
+  .table-wrap { -webkit-overflow-scrolling: touch; }
+}
+
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: 8px; }
+  .stat-card { padding: 10px 12px; }
+  .stat-card .val { font-size: 1.2rem; }
+  table { font-size: .72rem; }
+  thead th, tbody td { padding: 4px 6px; }
+  .nav-arrows button, .hdr-btn { padding: 7px 10px; font-size: .75rem; }
+  .view-title h2 { font-size: 1rem; }
+  .tab-btn { padding: 5px 10px; font-size: .75rem; }
+  #dropZone { padding: 24px 16px; min-height: 240px; }
+}
+
+/* Larger touch targets on touch devices, without affecting desktop density */
+@media (hover: none) and (pointer: coarse) {
+  .nav-arrows button, .hdr-btn, .tab-btn, .month-btn, .year-btn, .year-toggle {
+    min-height: 38px;
+  }
+
+  /* Hide persistent scrollbar tracks on touch devices (e.g. Android Chrome
+     renders scrollbar-width:thin as an always-visible bar, independent of
+     pinch-zoom level). Scrolling stays fully functional via touch. */
+  body, .content, .sidebar {
+    scrollbar-width: none;
+    overscroll-behavior: contain;
+  }
+  .table-wrap { scrollbar-width: none; }
+  body::-webkit-scrollbar,
+  .content::-webkit-scrollbar,
+  .sidebar::-webkit-scrollbar,
+  .table-wrap::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
 </style>
 </head>
 <body>
@@ -292,6 +380,7 @@ tbody tr:hover td { background: var(--surface2); }
 </script>
 
 <header>
+  <button class="hdr-btn menu-toggle" onclick="toggleSidebar()" title="Menü" aria-label="Menü öffnen">☰</button>
   <h1>⛅ Wetterbuch</h1>
   <span class="header-sub">C64 Weather Archive Viewer</span>
   <span id="locationLabel"></span>
@@ -299,7 +388,7 @@ tbody tr:hover td { background: var(--surface2); }
     <button id="btnPrev" onclick="navigate(-1)" title="Vorheriger Monat">◀</button>
     <button id="btnNext" onclick="navigate(+1)" title="Nächster Monat">▶</button>
     <label class="hdr-btn hdr-load" title="Ordner mit Jahresdaten wählen">
-      📂 Daten laden
+      📂 <span class="hdr-load-text">Daten laden</span>
       <input type="file" id="filePicker" multiple onchange="loadFiles(this.files)">
     </label>
   </div>
@@ -307,6 +396,7 @@ tbody tr:hover td { background: var(--surface2); }
 
 <div class="layout">
   <aside class="sidebar" id="sidebar"></aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
   <main class="content" id="content">
     <div id="dropZone">
       <h2>Wetterbuch — Datenarchiv</h2>
@@ -472,6 +562,18 @@ function toggleYear(year) {
   toggle.textContent = monthsWrap.classList.contains('collapsed') ? '▶' : '▼';
 }
 
+// ═══════════════════════════════════════════════════════
+// MOBILE SIDEBAR (off-canvas menu)
+// ═══════════════════════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('sidebar')?.classList.toggle('open');
+  document.getElementById('sidebarBackdrop')?.classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('sidebarBackdrop')?.classList.remove('show');
+}
+
 function setActive(year, month) {
   document.querySelectorAll('.year-btn, .month-btn').forEach(b => b.classList.remove('active'));
   if (month !== null) {
@@ -563,6 +665,7 @@ const baseOpts = (xLabel, yLabel) => ({
 function showMonth(year, monthIdx) {
   curYear = year; curMonth = monthIdx;
   setActive(year, monthIdx);
+  closeSidebar();
   const md = db[year][monthIdx];
   const s  = md.summary;
   const n  = md.days.length;
@@ -698,6 +801,7 @@ function showMonth(year, monthIdx) {
 function showAnnual(year) {
   curYear = year; curMonth = null;
   setActive(year, null);
+  closeSidebar();
   const yearData = db[year];
   const months = Object.keys(yearData).map(Number).sort((a,b)=>a-b);
 
