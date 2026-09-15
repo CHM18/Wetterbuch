@@ -2,11 +2,11 @@
 
 **To browse the data from 1985-1998, just open Wetterbuch.html in a webbrowser or run export_weather_to_excel.py to create a Excel Workbook with the data.**
 
-**The weather data was recorded near Landsberd am Lech (Bavaria)**
+**The weather data was recorded near Landsberd am Lech (Bavaria).**
 
 # WETTERBU.PRG — Commodore 64 Weather Diary ("Wetterbuch")
 
-**Written by Günter and Ch. Maier, 1992. Requires Simons BASIC cartridge.**
+**Written by Günter and Ch. Maier, last update 1992. Requires Simons BASIC cartridge.**
 
 ---
 
